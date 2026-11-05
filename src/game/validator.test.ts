@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDigitValidator } from './validator.js';
+import { createDigitValidator, isValidGuess } from './validator.js';
 
 describe('createDigitValidator', () => {
   it('accepts only 0 and 1 for binary', () => {
@@ -67,5 +67,55 @@ describe('createDigitValidator', () => {
 
     expect(isBinary('5')).toBe(false);
     expect(isDecimal('5')).toBe(true);
+  });
+});
+
+describe('isValidGuess', () => {
+  it('accepts a valid decimal guess', () => {
+    expect(isValidGuess('1234', 4, 10)).toBe(true);
+  });
+
+  it('accepts a guess with a leading zero', () => {
+    expect(isValidGuess('0123', 4, 10)).toBe(true);
+  });
+
+  it('rejects a guess of the wrong length', () => {
+    expect(isValidGuess('123', 4, 10)).toBe(false);
+    expect(isValidGuess('12345', 4, 10)).toBe(false);
+  });
+
+  it('rejects an empty guess', () => {
+    expect(isValidGuess('', 4, 10)).toBe(false);
+  });
+
+  it('rejects characters that are not digits of the base', () => {
+    expect(isValidGuess('12a4', 4, 10)).toBe(false);
+    expect(isValidGuess('02', 2, 2)).toBe(false);
+  });
+
+  it('rejects repeated digits', () => {
+    expect(isValidGuess('1123', 4, 10)).toBe(false);
+    expect(isValidGuess('1231', 4, 10)).toBe(false);
+  });
+
+  it('accepts uppercase and lowercase hex digits', () => {
+    expect(isValidGuess('a1f3', 4, 16)).toBe(true);
+    expect(isValidGuess('A1F3', 4, 16)).toBe(true);
+  });
+
+  it('treats hex digits that differ only by case as repeated', () => {
+    expect(isValidGuess('aA12', 4, 16)).toBe(false);
+  });
+
+  it('rejects spaces and symbols', () => {
+    expect(isValidGuess('12 4', 4, 10)).toBe(false);
+    expect(isValidGuess('-123', 4, 10)).toBe(false);
+  });
+
+  it('allows only length 2 without repeats for the binary base', () => {
+    expect(isValidGuess('01', 2, 2)).toBe(true);
+    expect(isValidGuess('10', 2, 2)).toBe(true);
+    expect(isValidGuess('00', 2, 2)).toBe(false);
+    expect(isValidGuess('011', 2, 2)).toBe(false);
   });
 });

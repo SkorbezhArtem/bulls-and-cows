@@ -6,3 +6,13 @@ export const createDigitValidator = (base: number) => {
   return (char: string): boolean =>
     char.length === 1 && alphabet.includes(char.toLowerCase());
 };
+
+export const isValidGuess = (
+  guess: string,
+  length: number,
+  base: number,
+): boolean => {
+  throw new Error(
+    `isValidGuess is not implemented (${guess}, ${length}, ${base})`,
+  );
+};
