@@ -12,7 +12,12 @@ export const isValidGuess = (
   length: number,
   base: number,
 ): boolean => {
-  throw new Error(
-    `isValidGuess is not implemented (${guess}, ${length}, ${base})`,
+  const isDigit = createDigitValidator(base);
+  const chars = guess.split('').map((char) => char.toLowerCase());
+
+  return (
+    chars.length === length &&
+    chars.every(isDigit) &&
+    new Set(chars).size === chars.length
   );
 };
