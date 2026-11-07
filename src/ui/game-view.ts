@@ -1,14 +1,77 @@
 import type { GameState } from '../game/state.js';
+import { createDigitValidator } from '../game/validator.js';
 import { h } from './dom.js';
 
-export const renderGame = (game: GameState): HTMLElement =>
-  h(
+type GameViewProps = {
+  game: GameState;
+  draft: string;
+  message: string | null;
+  onDraftChange: (draft: string) => void;
+  onSubmit: () => void;
+};
+
+export const renderGame = ({
+  game,
+  draft,
+  message,
+  onDraftChange,
+  onSubmit,
+}: GameViewProps): HTMLElement => {
+  const { length, base } = game.settings;
+  const isDigit = createDigitValidator(base);
+  const playing = game.status === 'playing';
+
+  const messageElement = h('p', { class: 'message', role: 'alert' }, message);
+
+  const input = h('input', {
+    id: 'guess',
+    type: 'text',
+    value: draft,
+    maxlength: length,
+    autocomplete: 'off',
+    autocapitalize: 'off',
+    spellcheck: 'false',
+    disabled: !playing,
+    'aria-label': `Your guess, ${length} digits`,
+    onInput: (event) => {
+      const field = event.target as HTMLInputElement;
+      const clean = [...field.value].filter(isDigit).slice(0, length).join('');
+
+      field.value = clean;
+      messageElement.textContent = '';
+      onDraftChange(clean);
+    },
+  });
+
+  return h(
     'section',
     { class: 'game' },
-    h('h2', {}, 'Round in progress'),
+    h('h2', {}, 'Your guess'),
+    h('p', {}, `Enter ${length} different digits (base ${base}).`),
     h(
-      'p',
-      {},
-      `Guess the secret: ${game.settings.length} unique digits, base ${game.settings.base}.`,
+      'form',
+      {
+        class: 'guess-form',
+        onSubmit: (event) => {
+          event.preventDefault();
+          onSubmit();
+        },
+      },
+      input,
+      h('button', { type: 'submit', disabled: !playing }, 'Guess'),
+    ),
+    messageElement,
+    h('h3', {}, `Attempts: ${game.history.length}`),
+    h(
+      'ol',
+      { class: 'history' },
+      ...game.history.map((attempt) =>
+        h(
+          'li',
+          {},
+          `${attempt.guess} — bulls: ${attempt.bulls}, cows: ${attempt.cows}`,
+        ),
+      ),
     ),
   );
+};
