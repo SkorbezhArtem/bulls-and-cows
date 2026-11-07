@@ -1,6 +1,7 @@
-import type { GameState } from '../game/state.js';
+import { getElapsedMs, type GameState } from '../game/state.js';
 import { createDigitValidator } from '../game/validator.js';
 import { h } from './dom.js';
+import { formatDuration } from './format.js';
 
 type GameViewProps = {
   game: GameState;
@@ -43,6 +44,17 @@ export const renderGame = ({
     },
   });
 
+  const result = playing
+    ? null
+    : h(
+        'div',
+        { class: 'result', role: 'status' },
+        h('h3', {}, 'You won!'),
+        h('p', {}, `The secret was ${game.secret}.`),
+        h('p', {}, `Attempts: ${game.history.length}`),
+        h('p', {}, `Time: ${formatDuration(getElapsedMs(game, Date.now()))}`),
+      );
+
   return h(
     'section',
     { class: 'game' },
@@ -61,7 +73,8 @@ export const renderGame = ({
       h('button', { type: 'submit', disabled: !playing }, 'Guess'),
     ),
     messageElement,
-    h('h3', {}, `Attempts: ${game.history.length}`),
+    result,
+    h('h3', {}, `History (${game.history.length})`),
     h(
       'ol',
       { class: 'history' },
