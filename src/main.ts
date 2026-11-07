@@ -46,6 +46,12 @@ const startGame = (): void => {
   render();
 };
 
+const newGame = (): void => {
+  state = { ...state, game: null, draft: '', message: null };
+  render();
+  document.getElementById('start')?.focus();
+};
+
 const setDraft = (draft: string): void => {
   state = { ...state, draft, message: null };
 };
@@ -106,6 +112,7 @@ const render = (): void => {
             message,
             onDraftChange: setDraft,
             onSubmit: sendGuess,
+            onNewGame: newGame,
           }),
         ]
       : []),

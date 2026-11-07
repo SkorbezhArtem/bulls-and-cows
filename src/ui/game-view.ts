@@ -9,6 +9,7 @@ type GameViewProps = {
   message: string | null;
   onDraftChange: (draft: string) => void;
   onSubmit: () => void;
+  onNewGame: () => void;
 };
 
 export const renderGame = ({
@@ -17,6 +18,7 @@ export const renderGame = ({
   message,
   onDraftChange,
   onSubmit,
+  onNewGame,
 }: GameViewProps): HTMLElement => {
   const { length, base } = game.settings;
   const isDigit = createDigitValidator(base);
@@ -74,6 +76,11 @@ export const renderGame = ({
     ),
     messageElement,
     result,
+    h(
+      'button',
+      { type: 'button', id: 'new-game', onClick: onNewGame },
+      'New game',
+    ),
     h('h3', {}, `History (${game.history.length})`),
     h(
       'ol',
