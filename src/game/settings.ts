@@ -15,5 +15,10 @@ export const withBase = (
   settings: GameSettings,
   base: number,
 ): GameSettings => {
-  throw new Error(`withBase is not implemented (${settings.length}, ${base})`);
+  const lengths = getAvailableLengths(base);
+  const length = lengths.includes(settings.length)
+    ? settings.length
+    : (lengths[0] ?? settings.length);
+
+  return { length, base };
 };
