@@ -1,9 +1,13 @@
+import { addRecord, createRecord } from './game/records.js';
+import type { GameRecord } from './game/records.js';
 import { generateSecret } from './game/secret.js';
 import { createGame, isRepeatedGuess, submitGuess } from './game/state.js';
 import type { GameSettings, GameState } from './game/state.js';
 import { isValidGuess } from './game/validator.js';
+import { loadRecords, saveRecords } from './services/storage.js';
 import { h } from './ui/dom.js';
 import { renderGame } from './ui/game-view.js';
+import { renderRecords } from './ui/records-view.js';
 import { renderSettings } from './ui/settings-view.js';
 
 type AppState = {
@@ -11,6 +15,7 @@ type AppState = {
   game: GameState | null;
   draft: string;
   message: string | null;
+  records: GameRecord[];
 };
 
 let state: AppState = {
@@ -18,6 +23,7 @@ let state: AppState = {
   game: null,
   draft: '',
   message: null,
+  records: loadRecords(),
 };
 
 const app = h('main', { id: 'app' });
@@ -68,23 +74,26 @@ const sendGuess = (): void => {
     return;
   }
 
-  state = {
-    ...state,
-    game: submitGuess(game, draft, Date.now()),
-    draft: '',
-    message: null,
-  };
+  const next = submitGuess(game, draft, Date.now());
+  const finished = createRecord(next);
+  const records = finished ? addRecord(state.records, finished) : state.records;
+
+  if (finished) {
+    saveRecords(records);
+  }
+
+  state = { ...state, game: next, draft: '', message: null, records };
   render();
 };
 
 const render = (): void => {
   const focusedId = document.activeElement?.id;
-  const { game, draft, message } = state;
+  const { game, draft, message, records, settings } = state;
 
   app.replaceChildren(
     h('h1', {}, 'Bulls and Cows'),
     renderSettings({
-      settings: state.settings,
+      settings,
       locked: game !== null,
       onChange: setSettings,
       onStart: startGame,
@@ -100,6 +109,7 @@ const render = (): void => {
           }),
         ]
       : []),
+    renderRecords({ records, settings }),
   );
 
   const focusId = game?.status === 'playing' ? 'guess' : focusedId;
