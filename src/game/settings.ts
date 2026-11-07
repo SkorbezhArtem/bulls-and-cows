@@ -1,3 +1,5 @@
+import type { GameSettings } from './state.js';
+
 export const MIN_LENGTH = 2;
 export const MAX_LENGTH = 6;
 
@@ -8,3 +10,10 @@ const ALL_LENGTHS: readonly number[] = Array.from(
 
 export const getAvailableLengths = (base: number): number[] =>
   ALL_LENGTHS.filter((length) => length <= base);
+
+export const withBase = (
+  settings: GameSettings,
+  base: number,
+): GameSettings => {
+  throw new Error(`withBase is not implemented (${settings.length}, ${base})`);
+};
