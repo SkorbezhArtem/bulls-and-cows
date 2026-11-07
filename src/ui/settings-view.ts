@@ -16,7 +16,9 @@ const BASES = [
 
 type SettingsViewProps = {
   settings: GameSettings;
+  locked: boolean;
   onChange: (settings: GameSettings) => void;
+  onStart: () => void;
 };
 
 const readNumber = (event: Event): number =>
@@ -24,14 +26,18 @@ const readNumber = (event: Event): number =>
 
 export const renderSettings = ({
   settings,
+  locked,
   onChange,
+  onStart,
 }: SettingsViewProps): HTMLElement => {
   const available = getAvailableLengths(settings.base);
+  const total = countPossibleSecrets(settings.length, settings.base);
 
   const baseSelect = h(
     'select',
     {
       id: 'base',
+      disabled: locked,
       onChange: (event) => onChange(withBase(settings, readNumber(event))),
     },
     ...BASES.map(({ base, label }) =>
@@ -43,6 +49,7 @@ export const renderSettings = ({
     'select',
     {
       id: 'length',
+      disabled: locked,
       onChange: (event) => onChange({ ...settings, length: readNumber(event) }),
     },
     ...ALL_LENGTHS.map((length) =>
@@ -57,8 +64,6 @@ export const renderSettings = ({
       ),
     ),
   );
-
-  const total = countPossibleSecrets(settings.length, settings.base);
 
   return h(
     'section',
@@ -81,5 +86,8 @@ export const renderSettings = ({
       { class: 'hint' },
       `Possible secrets: ${total.toLocaleString('en-US')}`,
     ),
+    locked
+      ? null
+      : h('button', { type: 'button', id: 'start', onClick: onStart }, 'Start'),
   );
 };
