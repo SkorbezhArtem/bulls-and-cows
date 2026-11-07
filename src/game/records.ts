@@ -8,33 +8,86 @@ export type GameRecord = {
 
 export const TOP_LIMIT = 10;
 
-export const createRecord = (state: GameState): GameRecord | null => {
-  throw new Error(`createRecord is not implemented (${state.status})`);
-};
+const isSameSettings = (a: GameSettings, b: GameSettings): boolean =>
+  a.length === b.length && a.base === b.base;
+
+const compareRecords = (a: GameRecord, b: GameRecord): number =>
+  a.attempts - b.attempts || a.timeMs - b.timeMs;
+
+export const createRecord = (state: GameState): GameRecord | null =>
+  state.status === 'won' && state.finishedAt !== null
+    ? {
+        settings: state.settings,
+        attempts: state.history.length,
+        timeMs: state.finishedAt - state.startedAt,
+      }
+    : null;
+
+export const getRecordsFor = (
+  records: readonly GameRecord[],
+  settings: GameSettings,
+): GameRecord[] =>
+  records
+    .filter((record) => isSameSettings(record.settings, settings))
+    .sort(compareRecords);
 
 export const addRecord = (
   records: readonly GameRecord[],
   record: GameRecord,
   limit: number = TOP_LIMIT,
 ): GameRecord[] => {
-  throw new Error(
-    `addRecord is not implemented (${records.length}, ${record.attempts}, ${limit})`,
+  const others = records.filter(
+    (item) => !isSameSettings(item.settings, record.settings),
   );
+  const top = getRecordsFor([...records, record], record.settings).slice(
+    0,
+    limit,
+  );
+
+  return [...others, ...top];
 };
 
-export const getRecordsFor = (
-  records: readonly GameRecord[],
-  settings: GameSettings,
-): GameRecord[] => {
-  throw new Error(
-    `getRecordsFor is not implemented (${records.length}, ${settings.length})`,
-  );
+export const serializeRecords = (records: readonly GameRecord[]): string =>
+  JSON.stringify(records);
+
+const isPositiveInteger = (value: unknown): boolean =>
+  typeof value === 'number' && Number.isInteger(value) && value > 0;
+
+const isSettings = (value: unknown): value is GameSettings => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const { length, base } = value as Record<string, unknown>;
+
+  return isPositiveInteger(length) && isPositiveInteger(base);
 };
 
-export const serializeRecords = (records: readonly GameRecord[]): string => {
-  throw new Error(`serializeRecords is not implemented (${records.length})`);
+const isGameRecord = (value: unknown): value is GameRecord => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const { settings, attempts, timeMs } = value as Record<string, unknown>;
+
+  return (
+    isSettings(settings) &&
+    isPositiveInteger(attempts) &&
+    typeof timeMs === 'number' &&
+    timeMs >= 0
+  );
 };
 
 export const parseRecords = (json: string | null): GameRecord[] => {
-  throw new Error(`parseRecords is not implemented (${json})`);
+  if (json === null) {
+    return [];
+  }
+
+  try {
+    const data: unknown = JSON.parse(json);
+
+    return Array.isArray(data) ? data.filter(isGameRecord) : [];
+  } catch {
+    return [];
+  }
 };
