@@ -1,3 +1,6 @@
+import { evaluateGuess } from './evaluate.js';
+import { isValidGuess } from './validator.js';
+
 export type GameSettings = { length: number; base: number };
 
 export type Attempt = { guess: string; bulls: number; cows: number };
@@ -15,28 +18,44 @@ export const createGame = (
   settings: GameSettings,
   secret: string,
   now: number,
-): GameState => {
-  throw new Error(
-    `createGame is not implemented (${JSON.stringify(settings)}, ${secret}, ${now})`,
-  );
-};
+): GameState => ({
+  settings,
+  secret,
+  status: 'playing',
+  history: [],
+  startedAt: now,
+  finishedAt: null,
+});
+
+export const isRepeatedGuess = (state: GameState, guess: string): boolean =>
+  state.history.some((attempt) => attempt.guess === guess.toLowerCase());
 
 export const submitGuess = (
   state: GameState,
   guess: string,
   now: number,
 ): GameState => {
-  throw new Error(
-    `submitGuess is not implemented (${state.status}, ${guess}, ${now})`,
-  );
+  const { length, base } = state.settings;
+  const normalized = guess.toLowerCase();
+
+  if (
+    state.status !== 'playing' ||
+    !isValidGuess(normalized, length, base) ||
+    isRepeatedGuess(state, normalized)
+  ) {
+    return state;
+  }
+
+  const { bulls, cows } = evaluateGuess(state.secret, normalized);
+  const won = bulls === length;
+
+  return {
+    ...state,
+    status: won ? 'won' : 'playing',
+    history: [...state.history, { guess: normalized, bulls, cows }],
+    finishedAt: won ? now : null,
+  };
 };
 
-export const isRepeatedGuess = (state: GameState, guess: string): boolean => {
-  throw new Error(
-    `isRepeatedGuess is not implemented (${state.status}, ${guess})`,
-  );
-};
-
-export const getElapsedMs = (state: GameState, now: number): number => {
-  throw new Error(`getElapsedMs is not implemented (${state.status}, ${now})`);
-};
+export const getElapsedMs = (state: GameState, now: number): number =>
+  (state.finishedAt ?? now) - state.startedAt;
