@@ -5,6 +5,7 @@ import {
   withBase,
 } from '../game/settings.js';
 import type { GameSettings } from '../game/state.js';
+import { DIGITS } from '../game/validator.js';
 import { h } from './dom.js';
 
 const BASES = [
@@ -31,6 +32,8 @@ export const renderSettings = ({
   onStart,
 }: SettingsViewProps): HTMLElement => {
   const available = getAvailableLengths(settings.base);
+  const maxLength = Math.max(...available);
+  const limited = available.length < ALL_LENGTHS.length;
   const total = countPossibleSecrets(settings.length, settings.base);
 
   const baseSelect = h(
@@ -82,9 +85,26 @@ export const renderSettings = ({
       lengthSelect,
     ),
     h(
-      'p',
-      { class: 'hint' },
-      `Possible secrets: ${total.toLocaleString('en-US')}`,
+      'div',
+      { class: 'hints' },
+      h(
+        'p',
+        { class: 'hint' },
+        `Possible secrets: ${total.toLocaleString('en-US')}`,
+      ),
+      h(
+        'p',
+        { class: 'hint' },
+        'Digits in play: ',
+        h('span', { class: 'digits-list' }, DIGITS.slice(0, settings.base)),
+      ),
+      limited
+        ? h(
+            'p',
+            { class: 'hint' },
+            `Base ${settings.base} has only ${settings.base} different digits, so the secret can be at most ${maxLength} digits long.`,
+          )
+        : null,
     ),
     locked
       ? null

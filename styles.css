@@ -152,7 +152,7 @@ p {
 }
 
 .settings > h2,
-.settings > .hint,
+.settings > .hints,
 .settings > button {
   grid-column: 1 / -1;
 }
@@ -171,10 +171,18 @@ label {
   font-size: 0.9rem;
 }
 
-.settings .hint {
+.hints {
+  display: grid;
+  gap: 0.25rem;
   padding: 0.6rem 0.8rem;
   border-radius: 0.6rem;
   background: var(--inset);
+}
+
+.digits-list {
+  color: var(--ink);
+  font-family: var(--font-digits);
+  letter-spacing: 0.15em;
 }
 
 input,
@@ -343,6 +351,20 @@ button:disabled {
 
 .result p {
   color: var(--ink);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .history {

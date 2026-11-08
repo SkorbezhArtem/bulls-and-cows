@@ -15,6 +15,24 @@ type GameViewProps = {
   onNewGame: () => void;
 };
 
+const renderLegend = (): HTMLElement =>
+  h(
+    'div',
+    { class: 'legend' },
+    h(
+      'span',
+      { class: 'legend-item' },
+      h('span', { class: 'peg peg-bull', 'aria-hidden': 'true' }),
+      'Bull: right digit, right place',
+    ),
+    h(
+      'span',
+      { class: 'legend-item' },
+      h('span', { class: 'peg peg-cow', 'aria-hidden': 'true' }),
+      'Cow: right digit, wrong place',
+    ),
+  );
+
 export const renderGame = ({
   game,
   draft,
@@ -26,6 +44,7 @@ export const renderGame = ({
   const { length, base } = game.settings;
   const isDigit = createDigitValidator(base);
   const playing = game.status === 'playing';
+  const hasAttempts = game.history.length > 0;
 
   const messageElement = h('p', { class: 'message', role: 'alert' }, message);
 
@@ -104,6 +123,13 @@ export const renderGame = ({
       'New game',
     ),
     h('h3', {}, `History (${game.history.length})`),
-    h('ol', { class: 'history' }, ...game.history.map(renderAttempt)),
+    hasAttempts ? renderLegend() : null,
+    hasAttempts
+      ? h('ol', { class: 'history' }, ...game.history.map(renderAttempt))
+      : h(
+          'p',
+          { class: 'hint' },
+          `No attempts yet. Try any ${length} different digits.`,
+        ),
   );
 };
