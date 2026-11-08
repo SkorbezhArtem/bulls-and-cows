@@ -119,7 +119,11 @@ const render = (): void => {
     renderRecords({ records, settings }),
   );
 
-  const focusId = game?.status === 'playing' ? 'guess' : focusedId;
+  const focusId = !game
+    ? focusedId
+    : game.status === 'playing'
+      ? 'guess'
+      : 'new-game';
   const target = focusId ? document.getElementById(focusId) : null;
 
   target?.focus();

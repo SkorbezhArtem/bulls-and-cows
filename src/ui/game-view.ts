@@ -88,12 +88,33 @@ export const renderGame = ({
         h('p', {}, `The secret was ${game.secret}.`),
         h('p', {}, `Attempts: ${game.history.length}`),
         h('p', {}, `Time: ${formatDuration(getElapsedMs(game, Date.now()))}`),
+        h(
+          'button',
+          { type: 'button', id: 'new-game', onClick: onNewGame },
+          'New game',
+        ),
       );
 
   return h(
     'section',
     { class: 'game' },
-    h('h2', {}, 'Your guess'),
+    h(
+      'div',
+      { class: 'game-head' },
+      h('h2', {}, 'Your guess'),
+      playing
+        ? h(
+            'button',
+            {
+              type: 'button',
+              id: 'new-game',
+              class: 'btn-ghost',
+              onClick: onNewGame,
+            },
+            'New game',
+          )
+        : null,
+    ),
     h('p', {}, `Enter ${length} different digits (base ${base}).`),
     h(
       'form',
@@ -110,11 +131,6 @@ export const renderGame = ({
     messageElement,
     playing ? keypad.element : null,
     result,
-    h(
-      'button',
-      { type: 'button', id: 'new-game', onClick: onNewGame },
-      'New game',
-    ),
     h('h3', {}, `History (${game.history.length})`),
     hasAttempts ? renderLegend() : null,
     hasAttempts
