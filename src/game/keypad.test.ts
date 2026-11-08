@@ -3,6 +3,7 @@ import {
   appendDigit,
   deleteLastDigit,
   getKeypadKeys,
+  sanitizeDraft,
   type KeypadKey,
 } from './keypad.js';
 
@@ -102,5 +103,45 @@ describe('deleteLastDigit', () => {
 
   it('keeps an empty draft empty', () => {
     expect(deleteLastDigit('')).toBe('');
+  });
+});
+
+describe('sanitizeDraft', () => {
+  it('keeps valid digits in the same order', () => {
+    expect(sanitizeDraft('123', 4, 10)).toBe('123');
+  });
+
+  it('drops repeated digits and keeps the first one', () => {
+    expect(sanitizeDraft('1123', 4, 10)).toBe('123');
+    expect(sanitizeDraft('1213', 4, 10)).toBe('123');
+  });
+
+  it('drops characters that do not belong to the base', () => {
+    expect(sanitizeDraft('12a4', 4, 10)).toBe('124');
+    expect(sanitizeDraft('012', 2, 2)).toBe('01');
+  });
+
+  it('cuts the draft to the secret length', () => {
+    expect(sanitizeDraft('12345', 4, 10)).toBe('1234');
+  });
+
+  it('stores hex digits in lowercase', () => {
+    expect(sanitizeDraft('A1F3', 4, 16)).toBe('a1f3');
+  });
+
+  it('treats hex digits that differ only by case as repeated', () => {
+    expect(sanitizeDraft('aA1', 4, 16)).toBe('a1');
+  });
+
+  it('returns an empty draft for empty input', () => {
+    expect(sanitizeDraft('', 4, 10)).toBe('');
+  });
+
+  it('drops spaces and symbols', () => {
+    expect(sanitizeDraft('1 2-3', 4, 10)).toBe('123');
+  });
+
+  it('handles pasted text with repeats and overflow', () => {
+    expect(sanitizeDraft('11223344', 4, 10)).toBe('1234');
   });
 });

@@ -32,3 +32,13 @@ export const appendDigit = (
 };
 
 export const deleteLastDigit = (draft: string): string => draft.slice(0, -1);
+
+export const sanitizeDraft = (
+  raw: string,
+  length: number,
+  base: number,
+): string => {
+  throw new Error(
+    `sanitizeDraft is not implemented (${raw}, ${length}, ${base})`,
+  );
+};
