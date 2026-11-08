@@ -718,3 +718,66 @@ tbody tr:first-child td:first-child {
     font-size: 1rem;
   }
 }
+
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+
+  select {
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-right: 0.9rem;
+    background-image: none;
+  }
+
+  select::picker-icon {
+    color: var(--muted);
+    transition: rotate 150ms;
+  }
+
+  select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  select::picker(select) {
+    margin-top: 0.35rem;
+    padding: 0.35rem;
+    border: 1px solid var(--rule);
+    border-radius: 0.8rem;
+    background: var(--sheet);
+    box-shadow: 0 20px 40px -16px var(--shadow);
+    position-try-order: normal;
+  }
+
+  option {
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.5rem;
+    color: var(--ink);
+    font: inherit;
+  }
+
+  option:hover {
+    background: var(--inset);
+  }
+
+  option:checked {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    font-weight: 700;
+  }
+
+  option:disabled {
+    opacity: 0.4;
+  }
+
+  option::checkmark {
+    color: var(--accent);
+  }
+}
+
+select:not(:disabled),
+option:not(:disabled) {
+  cursor: pointer;
+}
