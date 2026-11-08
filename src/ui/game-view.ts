@@ -1,8 +1,10 @@
+import { appendDigit, deleteLastDigit } from '../game/keypad.js';
 import { getElapsedMs, type GameState } from '../game/state.js';
 import { createDigitValidator } from '../game/validator.js';
+import { renderAttempt } from './attempt-view.js';
 import { h } from './dom.js';
 import { formatDuration } from './format.js';
-import { renderAttempt } from './attempt-view.js';
+import { renderKeypad } from './keypad-view.js';
 
 type GameViewProps = {
   game: GameState;
@@ -27,11 +29,21 @@ export const renderGame = ({
 
   const messageElement = h('p', { class: 'message', role: 'alert' }, message);
 
+  const keypad = renderKeypad({
+    base,
+    length,
+    draft,
+    onDigit: (digit) =>
+      applyDraft(appendDigit(input.value, digit, length, base)),
+    onDelete: () => applyDraft(deleteLastDigit(input.value)),
+  });
+
   const input = h('input', {
     id: 'guess',
     type: 'text',
     value: draft,
     maxlength: length,
+    inputmode: 'none',
     autocomplete: 'off',
     autocapitalize: 'off',
     spellcheck: 'false',
@@ -39,13 +51,21 @@ export const renderGame = ({
     'aria-label': `Your guess, ${length} digits`,
     onInput: (event) => {
       const field = event.target as HTMLInputElement;
-      const clean = [...field.value].filter(isDigit).slice(0, length).join('');
+      const clean = [...field.value.toLowerCase()]
+        .filter(isDigit)
+        .slice(0, length)
+        .join('');
 
-      field.value = clean;
-      messageElement.textContent = '';
-      onDraftChange(clean);
+      applyDraft(clean);
     },
   });
+
+  const applyDraft = (next: string): void => {
+    input.value = next;
+    messageElement.textContent = '';
+    keypad.update(next);
+    onDraftChange(next);
+  };
 
   const result = playing
     ? null
@@ -76,6 +96,7 @@ export const renderGame = ({
       h('button', { type: 'submit', disabled: !playing }, 'Guess'),
     ),
     messageElement,
+    playing ? keypad.element : null,
     result,
     h(
       'button',

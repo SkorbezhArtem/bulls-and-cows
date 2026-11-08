@@ -277,6 +277,39 @@ button:disabled {
   padding-inline: 1.5rem;
 }
 
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(2.75rem, 4rem));
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.key {
+  min-height: 2.9rem;
+  padding: 0.25rem;
+  border-color: var(--rule);
+  background: var(--inset);
+  color: var(--ink);
+  font-family: var(--font-digits);
+  font-size: 1.2rem;
+  font-variant-numeric: slashed-zero;
+  box-shadow: 0 3px 0 var(--rule);
+}
+
+.key:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--rule);
+}
+
+.key:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.key-delete {
+  font-family: var(--font-ui);
+}
+
 .message {
   padding: 0.55rem 0.8rem;
   border-left: 3px solid var(--danger);
