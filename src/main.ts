@@ -4,11 +4,18 @@ import { generateSecret } from './game/secret.js';
 import { createGame, isRepeatedGuess, submitGuess } from './game/state.js';
 import type { GameSettings, GameState } from './game/state.js';
 import { isValidGuess } from './game/validator.js';
-import { loadRecords, saveRecords } from './services/storage.js';
+import {
+  loadRecords,
+  loadTheme,
+  saveRecords,
+  saveTheme,
+} from './services/storage.js';
+import type { Theme } from './utils/theme.js';
 import { h } from './ui/dom.js';
 import { renderGame } from './ui/game-view.js';
 import { renderRecords } from './ui/records-view.js';
 import { renderSettings } from './ui/settings-view.js';
+import { applyTheme, renderThemeSwitcher } from './ui/theme-view.js';
 
 type AppState = {
   settings: GameSettings;
@@ -16,7 +23,11 @@ type AppState = {
   draft: string;
   message: string | null;
   records: GameRecord[];
+  theme: Theme;
 };
+
+const initialTheme = loadTheme();
+applyTheme(initialTheme);
 
 let state: AppState = {
   settings: { length: 4, base: 10 },
@@ -24,10 +35,31 @@ let state: AppState = {
   draft: '',
   message: null,
   records: loadRecords(),
+  theme: initialTheme,
 };
 
 const app = h('main', { id: 'app' });
 document.body.append(app);
+
+const setTheme = (theme: Theme): void => {
+  const update = (): void => {
+    applyTheme(theme);
+    saveTheme(theme);
+    state = { ...state, theme };
+    render();
+  };
+
+  const reducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)',
+  ).matches;
+
+  if (reducedMotion || !('startViewTransition' in document)) {
+    update();
+    return;
+  }
+
+  document.startViewTransition(update);
+};
 
 const setSettings = (settings: GameSettings): void => {
   state = { ...state, settings };
@@ -92,12 +124,32 @@ const sendGuess = (): void => {
   render();
 };
 
+const pickFocusId = (
+  focusedId: string | undefined,
+  game: GameState | null,
+): string | undefined => {
+  if (focusedId?.startsWith('theme-')) {
+    return focusedId;
+  }
+
+  if (!game) {
+    return focusedId;
+  }
+
+  return game.status === 'playing' ? 'guess' : 'new-game';
+};
+
 const render = (): void => {
   const focusedId = document.activeElement?.id;
-  const { game, draft, message, records, settings } = state;
+  const { game, draft, message, records, settings, theme } = state;
 
   app.replaceChildren(
-    h('h1', {}, 'Bulls and Cows'),
+    h(
+      'header',
+      { class: 'app-header' },
+      h('h1', {}, 'Bulls and Cows'),
+      renderThemeSwitcher({ theme, onChange: setTheme }),
+    ),
     renderSettings({
       settings,
       locked: game !== null,
@@ -119,11 +171,7 @@ const render = (): void => {
     renderRecords({ records, settings }),
   );
 
-  const focusId = !game
-    ? focusedId
-    : game.status === 'playing'
-      ? 'guess'
-      : 'new-game';
+  const focusId = pickFocusId(focusedId, game);
   const target = focusId ? document.getElementById(focusId) : null;
 
   target?.focus();
