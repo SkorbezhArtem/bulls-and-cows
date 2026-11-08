@@ -120,9 +120,13 @@ const render = (): void => {
   );
 
   const focusId = game?.status === 'playing' ? 'guess' : focusedId;
+  const target = focusId ? document.getElementById(focusId) : null;
 
-  if (focusId) {
-    document.getElementById(focusId)?.focus();
+  target?.focus();
+
+  if (target instanceof HTMLInputElement) {
+    const end = target.value.length;
+    target.setSelectionRange(end, end);
   }
 };
 
