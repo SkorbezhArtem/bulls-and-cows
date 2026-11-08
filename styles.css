@@ -104,15 +104,23 @@ body::before {
 
 .app-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
+  gap: 0.75rem;
   margin-bottom: 0.25rem;
+  text-align: center;
 }
 
 .app-header h1 {
   margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .theme-switcher {
@@ -216,8 +224,7 @@ p {
   box-shadow: 0 18px 30px -24px var(--shadow);
 }
 
-.game,
-.records {
+.game {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -567,11 +574,53 @@ button:disabled {
   }
 }
 
-.records {
+.records-dialog {
+  width: min(30rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 30px 60px -20px var(--shadow);
+}
+
+.records-dialog[open] {
+  animation: pop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.records-dialog::backdrop {
+  background: color-mix(in srgb, #000 55%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+body:has(.records-dialog[open]) {
+  overflow: hidden;
+}
+
+.dialog-body {
   display: grid;
+  gap: 1rem;
+  padding: clamp(1.1rem, 4vw, 1.5rem);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--rule);
+}
+
+.dialog-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.empty {
+  padding: 1rem 0;
+  text-align: center;
 }
 
 table {
@@ -643,7 +692,8 @@ tbody tr:first-child td:first-child {
 }
 
 @media (max-width: 30rem) {
-  .settings {
+  .settings,
+  .dialog-filters {
     grid-template-columns: minmax(0, 1fr);
   }
 

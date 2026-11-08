@@ -13,7 +13,7 @@ import {
 import type { Theme } from './utils/theme.js';
 import { h } from './ui/dom.js';
 import { renderGame } from './ui/game-view.js';
-import { renderRecords } from './ui/records-view.js';
+import { createRecordsDialog } from './ui/records-dialog.js';
 import { renderSettings } from './ui/settings-view.js';
 import { applyTheme, renderThemeSwitcher } from './ui/theme-view.js';
 
@@ -39,7 +39,12 @@ let state: AppState = {
 };
 
 const app = h('main', { id: 'app' });
-document.body.append(app);
+const recordsDialog = createRecordsDialog({
+  getRecords: () => state.records,
+  getSettings: () => state.settings,
+});
+
+document.body.append(app, recordsDialog.element);
 
 const setTheme = (theme: Theme): void => {
   const update = (): void => {
@@ -141,14 +146,28 @@ const pickFocusId = (
 
 const render = (): void => {
   const focusedId = document.activeElement?.id;
-  const { game, draft, message, records, settings, theme } = state;
+  const { game, draft, message, settings, theme } = state;
 
   app.replaceChildren(
     h(
       'header',
       { class: 'app-header' },
       h('h1', {}, 'Bulls and Cows'),
-      renderThemeSwitcher({ theme, onChange: setTheme }),
+      h(
+        'div',
+        { class: 'header-actions' },
+        h(
+          'button',
+          {
+            type: 'button',
+            id: 'records-open',
+            class: 'btn-ghost',
+            onClick: recordsDialog.open,
+          },
+          'High scores',
+        ),
+        renderThemeSwitcher({ theme, onChange: setTheme }),
+      ),
     ),
     renderSettings({
       settings,
@@ -168,7 +187,6 @@ const render = (): void => {
           }),
         ]
       : []),
-    renderRecords({ records, settings }),
   );
 
   const focusId = pickFocusId(focusedId, game);

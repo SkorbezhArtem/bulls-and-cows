@@ -8,7 +8,7 @@ import type { GameSettings } from '../game/state.js';
 import { DIGITS } from '../game/validator.js';
 import { h } from './dom.js';
 
-const BASES = [
+export const BASES = [
   { base: 2, label: 'Binary (bin)' },
   { base: 8, label: 'Octal (oct)' },
   { base: 10, label: 'Decimal (dec)' },

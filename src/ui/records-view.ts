@@ -3,55 +3,51 @@ import type { GameSettings } from '../game/state.js';
 import { h } from './dom.js';
 import { formatDuration } from './format.js';
 
-type RecordsViewProps = {
+type RecordsTableProps = {
   records: readonly GameRecord[];
   settings: GameSettings;
 };
 
-export const renderRecords = ({
+export const renderRecordsTable = ({
   records,
   settings,
-}: RecordsViewProps): HTMLElement => {
+}: RecordsTableProps): HTMLElement => {
   const top = getRecordsFor(records, settings);
 
-  return h(
-    'section',
-    { class: 'records' },
-    h('h2', {}, 'High scores'),
-    h(
+  if (top.length === 0) {
+    return h(
       'p',
-      { class: 'hint' },
-      `Length ${settings.length}, base ${settings.base}`,
+      { class: 'empty' },
+      'No results yet. Win a round to set the first record.',
+    );
+  }
+
+  return h(
+    'table',
+    {},
+    h(
+      'thead',
+      {},
+      h(
+        'tr',
+        {},
+        h('th', { scope: 'col' }, '#'),
+        h('th', { scope: 'col' }, 'Attempts'),
+        h('th', { scope: 'col' }, 'Time'),
+      ),
     ),
-    top.length === 0
-      ? h('p', {}, 'No results yet.')
-      : h(
-          'table',
+    h(
+      'tbody',
+      {},
+      ...top.map((record, index) =>
+        h(
+          'tr',
           {},
-          h(
-            'thead',
-            {},
-            h(
-              'tr',
-              {},
-              h('th', { scope: 'col' }, '#'),
-              h('th', { scope: 'col' }, 'Attempts'),
-              h('th', { scope: 'col' }, 'Time'),
-            ),
-          ),
-          h(
-            'tbody',
-            {},
-            ...top.map((record, index) =>
-              h(
-                'tr',
-                {},
-                h('td', {}, String(index + 1)),
-                h('td', {}, String(record.attempts)),
-                h('td', {}, formatDuration(record.timeMs)),
-              ),
-            ),
-          ),
+          h('td', {}, String(index + 1)),
+          h('td', {}, String(record.attempts)),
+          h('td', {}, formatDuration(record.timeMs)),
         ),
+      ),
+    ),
   );
 };
