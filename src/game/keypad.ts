@@ -1,3 +1,5 @@
+import { createDigitValidator, DIGITS } from './validator.js';
+
 export type KeypadKey = { digit: string; disabled: boolean };
 
 export const getKeypadKeys = (
@@ -5,9 +7,13 @@ export const getKeypadKeys = (
   draft: string,
   length: number,
 ): KeypadKey[] => {
-  throw new Error(
-    `getKeypadKeys is not implemented (${base}, ${draft}, ${length})`,
-  );
+  const used = new Set([...draft.toLowerCase()]);
+  const full = draft.length >= length;
+
+  return [...DIGITS.slice(0, base)].map((digit) => ({
+    digit,
+    disabled: full || used.has(digit),
+  }));
 };
 
 export const appendDigit = (
@@ -16,11 +22,13 @@ export const appendDigit = (
   length: number,
   base: number,
 ): string => {
-  throw new Error(
-    `appendDigit is not implemented (${draft}, ${digit}, ${length}, ${base})`,
-  );
+  const normalized = digit.toLowerCase();
+  const canAppend =
+    createDigitValidator(base)(normalized) &&
+    draft.length < length &&
+    !draft.toLowerCase().includes(normalized);
+
+  return canAppend ? draft + normalized : draft;
 };
 
-export const deleteLastDigit = (draft: string): string => {
-  throw new Error(`deleteLastDigit is not implemented (${draft})`);
-};
+export const deleteLastDigit = (draft: string): string => draft.slice(0, -1);
