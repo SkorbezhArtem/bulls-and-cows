@@ -5,3 +5,6 @@ export const formatDuration = (ms: number): string => {
 
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 };
+
+export const pluralize = (count: number, word: string): string =>
+  count === 1 ? word : `${word}s`;

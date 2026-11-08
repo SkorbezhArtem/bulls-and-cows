@@ -2,6 +2,7 @@ import { getElapsedMs, type GameState } from '../game/state.js';
 import { createDigitValidator } from '../game/validator.js';
 import { h } from './dom.js';
 import { formatDuration } from './format.js';
+import { renderAttempt } from './attempt-view.js';
 
 type GameViewProps = {
   game: GameState;
@@ -82,16 +83,6 @@ export const renderGame = ({
       'New game',
     ),
     h('h3', {}, `History (${game.history.length})`),
-    h(
-      'ol',
-      { class: 'history' },
-      ...game.history.map((attempt) =>
-        h(
-          'li',
-          {},
-          `${attempt.guess} — bulls: ${attempt.bulls}, cows: ${attempt.cows}`,
-        ),
-      ),
-    ),
+    h('ol', { class: 'history' }, ...game.history.map(renderAttempt)),
   );
 };
