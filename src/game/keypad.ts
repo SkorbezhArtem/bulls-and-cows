@@ -37,8 +37,5 @@ export const sanitizeDraft = (
   raw: string,
   length: number,
   base: number,
-): string => {
-  throw new Error(
-    `sanitizeDraft is not implemented (${raw}, ${length}, ${base})`,
-  );
-};
+): string =>
+  [...raw].reduce((draft, char) => appendDigit(draft, char, length, base), '');

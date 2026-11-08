@@ -1,6 +1,5 @@
-import { appendDigit, deleteLastDigit } from '../game/keypad.js';
+import { appendDigit, deleteLastDigit, sanitizeDraft } from '../game/keypad.js';
 import { getElapsedMs, type GameState } from '../game/state.js';
-import { createDigitValidator } from '../game/validator.js';
 import { renderAttempt } from './attempt-view.js';
 import { h } from './dom.js';
 import { formatDuration } from './format.js';
@@ -42,7 +41,6 @@ export const renderGame = ({
   onNewGame,
 }: GameViewProps): HTMLElement => {
   const { length, base } = game.settings;
-  const isDigit = createDigitValidator(base);
   const playing = game.status === 'playing';
   const hasAttempts = game.history.length > 0;
 
@@ -70,12 +68,7 @@ export const renderGame = ({
     'aria-label': `Your guess, ${length} digits`,
     onInput: (event) => {
       const field = event.target as HTMLInputElement;
-      const clean = [...field.value.toLowerCase()]
-        .filter(isDigit)
-        .slice(0, length)
-        .join('');
-
-      applyDraft(clean);
+      applyDraft(sanitizeDraft(field.value, length, base));
     },
   });
 
